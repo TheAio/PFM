@@ -19,10 +19,10 @@ local camera = {
 ThreeDFrame:setCamera(camera)
 
 -- define the objects to be rendered
-local objects = {
-  ThreeDFrame:newObject("models/Flag", 0, 0, 0), -- pineapple at 0, 0, 0
-  ThreeDFrame:newObject("models/Flag", 0, 5, 0),
-  ThreeDFrame:newObject("models/Flag", 0, 10, 0)
+objects = {
+  --ThreeDFrame:newObject("models/Flag", 0, 0, 0), -- pineapple at 0, 0, 0
+  --ThreeDFrame:newObject("models/Flag", 0, 5, 0),
+  --ThreeDFrame:newObject("models/Flag", 0, 10, 0)
 }
 
 -- handle all keypresses and store in a lookup table
@@ -106,6 +106,9 @@ end
 
 -- handle fetching and running serviceData
 local function handleServiceData(dt)
+  if fs.exists("PFMServiceData.tmp.lock") then
+    return nil
+  end
   if fs.exists("PFMServiceData.tmp") then
     local h = fs.open("PFMServiceData.tmp","r")
     local serviceDataData={}
@@ -116,15 +119,12 @@ local function handleServiceData(dt)
       serviceDataData[#serviceDataData+1] = i
     end
     h.close()
+    fs.open("PFMServiceData.tmp","w").close()
     local serviceDataLine = 0
     while true do
       serviceDataLine = serviceDataLine + 1
       if serviceDataLine > #serviceDataData then break end
-      if serviceDataData[serviceDataLine] == "$RELOAD" then
-        shell.run("PFM")
-        fs.open("PFMServiceData.tmp","w").close()
-        error()
-      elseif serviceDataData[serviceDataLine] == "$NEW" then
+      if serviceDataData[serviceDataLine] == "$NEW" then
         objects[#objects+1] = ThreeDFrame:newObject(serviceDataData[serviceDataLine+1], 0, 0, 0)
       elseif serviceDataData[serviceDataLine] == "$REMOVE" then
         local i = tonumber(serviceDataData[serviceDataLine+1])
@@ -133,8 +133,12 @@ local function handleServiceData(dt)
           objects[i] = nil
         end
       elseif serviceDataData[serviceDataLine] == "$MOVE" then
-        objects[serviceDataData[serviceDataLine+1]]:setPos(tonumber(serviceDataData[serviceDataLine+2]), tonumber(serviceDataData[serviceDataLine+3]), tonumber(serviceDataData[serviceDataLine+4]))
-        objects[serviceDataData[serviceDataLine+1]]:setRot(serviceDataData[serviceDataLine+5], serviceDataData[serviceDataLine+6], serviceDataData[serviceDataLine+7])
+        if tonumber(serviceDataData[serviceDataLine+1]) == nil then
+        elseif tonumber(serviceDataData[serviceDataLine+1]) > #objects then
+        else
+          objects[tonumber(serviceDataData[serviceDataLine+1])]:setPos(tonumber(serviceDataData[serviceDataLine+2]), tonumber(serviceDataData[serviceDataLine+3]), tonumber(serviceDataData[serviceDataLine+4]))
+          objects[tonumber(serviceDataData[serviceDataLine+1])]:setRot(serviceDataData[serviceDataLine+5], serviceDataData[serviceDataLine+6], serviceDataData[serviceDataLine+7])
+        end
       elseif serviceDataData[serviceDataLine] == "$SAVE" then
         error("PFMServiceData malformed!")
       end
