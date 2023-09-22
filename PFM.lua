@@ -18,12 +18,8 @@ local camera = {
 }
 ThreeDFrame:setCamera(camera)
 
--- define the objects to be rendered
-objects = {
-  --ThreeDFrame:newObject("models/Flag", 0, 0, 0), -- pineapple at 0, 0, 0
-  --ThreeDFrame:newObject("models/Flag", 0, 5, 0),
-  --ThreeDFrame:newObject("models/Flag", 0, 10, 0)
-}
+-- define the Objects to be rendered
+Objects = {}
 
 -- handle all keypresses and store in a lookup table
 -- to check later if a key is being pressed
@@ -101,6 +97,9 @@ local function handleSpecialEvents(dt)
   elseif keysDown[keys.leftAlt] then
     keysDown={}
     shell.run("bg ControllMenu.lua")
+  elseif keysDown[keys.p] then
+    keysDown={}
+    shell.run("bg AnimationService.lua")
   end
 end
 
@@ -125,22 +124,24 @@ local function handleServiceData(dt)
       serviceDataLine = serviceDataLine + 1
       if serviceDataLine > #serviceDataData then break end
       if serviceDataData[serviceDataLine] == "$NEW" then
-        objects[#objects+1] = ThreeDFrame:newObject(serviceDataData[serviceDataLine+1], 0, 0, 0)
+        Objects[#Objects+1] = ThreeDFrame:newObject(serviceDataData[serviceDataLine+1], 0, 0, 0)
       elseif serviceDataData[serviceDataLine] == "$REMOVE" then
         local i = tonumber(serviceDataData[serviceDataLine+1])
         if i == nil then -- This checks for incorrect inputs
-        elseif i < #objects+1 then
-          objects[i] = nil
+        elseif i < #Objects+1 then
+          Objects[i] = nil
         end
       elseif serviceDataData[serviceDataLine] == "$MOVE" then
         if tonumber(serviceDataData[serviceDataLine+1]) == nil then
-        elseif tonumber(serviceDataData[serviceDataLine+1]) > #objects then
+        elseif tonumber(serviceDataData[serviceDataLine+1]) > #Objects then
         else
-          objects[tonumber(serviceDataData[serviceDataLine+1])]:setPos(tonumber(serviceDataData[serviceDataLine+2]), tonumber(serviceDataData[serviceDataLine+3]), tonumber(serviceDataData[serviceDataLine+4]))
-          objects[tonumber(serviceDataData[serviceDataLine+1])]:setRot(serviceDataData[serviceDataLine+5], serviceDataData[serviceDataLine+6], serviceDataData[serviceDataLine+7])
+          Objects[tonumber(serviceDataData[serviceDataLine+1])]:setPos(tonumber(serviceDataData[serviceDataLine+2]), tonumber(serviceDataData[serviceDataLine+3]), tonumber(serviceDataData[serviceDataLine+4]))
+          Objects[tonumber(serviceDataData[serviceDataLine+1])]:setRot(serviceDataData[serviceDataLine+5], serviceDataData[serviceDataLine+6], serviceDataData[serviceDataLine+7])
         end
       elseif serviceDataData[serviceDataLine] == "$SAVE" then
-        error("PFMServiceData malformed!")
+        error("Feature not avaible yet! Sorry :(") --Todo: remove when safe to do so.
+        --I know this is a bad idea not to have implelented yet, i will solve it soon.
+
       end
     end
   end
@@ -149,10 +150,10 @@ end
 -- handle game logic
 local function handleGameLogic(dt)
   -- set y coordinate to move up and down based on time
-  --objects[1]:setPos(nil, math.sin(os.clock())*0.25, nil)
+  --Objects[1]:setPos(nil, math.sin(os.clock())*0.25, nil)
 
   -- set horizontal rotation depending on the time
-  --objects[1]:setRot(nil, os.clock(), nil)
+  --Objects[1]:setRot(nil, os.clock(), nil)
 end
 
 -- handle the game logic and camera movement in steps
@@ -175,10 +176,10 @@ local function gameLoop()
   end
 end
 
--- render the objects
+-- render the Objects
 local function rendering()
   while true do
-    ThreeDFrame:drawObjects(objects)
+    ThreeDFrame:drawObjects(Objects)
     ThreeDFrame:drawBuffer()
 
     os.queueEvent("rendering")
