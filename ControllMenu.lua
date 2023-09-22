@@ -11,6 +11,7 @@ print("6. [ADV] reset ServiceData")
 print("7. [ADV] write custom line to ServiceData")
 local command = tonumber(read())
 local function writeToFile(overWrite,path,data)
+    fs.open(path..".lock","w").close()
     if overWrite then
         local h=fs.open(path,"w")
         for i=1,#data do
@@ -34,17 +35,16 @@ local function writeToFile(overWrite,path,data)
         local h=fs.open(path,"w")
         for i=1,#oldData do
             print(100*(i/#oldData))
-            sleep(1)
             sleep(0)
             h.writeLine(oldData[i])
         end
         for i=1,#data do
             print(100*(i/#data))
-            sleep(1)
             h.writeLine(data[i])
         end
         h.close()
     end
+    shell.run("rm",path..".lock")
 end
 if command == "DEV" then
     writeToFile(false,read(),{read()})
@@ -54,6 +54,9 @@ elseif command == 1 then
     shell.run("sh")
 elseif command == 2 then
     term.clear()
+    if fs.exists("models/") then
+        shell.run("ls models/")
+    end
     print("Enter path to new model:")
     local model = read()
     if fs.exists(model) then
