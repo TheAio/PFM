@@ -26,17 +26,15 @@ local function translateSingleObject(targetID,animationPath)
             local j = {targetID,animationData[time],animationData[time+1],animationData[time+2],animationData[time+3],animationData[time+4],animationData[time+5]}
             executionData[#executionData+1] = {"$MOVE"}
             executionData[#executionData+2] = j
-            print("Reading old ServiceData")
             local oldServiceData = readLines("PFMServiceData.tmp")
             local h = fs.open("PFMServiceData.tmp","w")
             for i=1,#oldServiceData do
-                print("Writing old ServiceData",100*(i/#oldServiceData))
                 h.writeLine(oldServiceData[i])
                 sleep(0)
             end
             for i=1,#executionData do
                 for j=1,#executionData[i] do
-                    print("Writing new ServiceData",100*(i/#executionData))
+                    print(executionData[i][j])
                     h.writeLine(executionData[i][j])
                     sleep(0)
                 end
