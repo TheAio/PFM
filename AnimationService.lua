@@ -14,7 +14,7 @@ local function readLines(path)
     end
 end
 
-local function translateSingleObject(targetID,animationPath,dt)
+local function translateSingleObject(targetID,animationPath)
     local animationData = readLines(animationPath)
     local executionData = {}
     for time=2,#animationData,5 do
@@ -46,7 +46,33 @@ local function translateSingleObject(targetID,animationPath,dt)
         end
     end
 end
-while true do
-    translateSingleObject(1,"exampleAnimationData.eva",nil)
-    sleep(10)
+
+local function translateAnimationCollection(rootID,folderPath)
+    if not fs.exists(folderPath.."/") then return nil end
+    local folder = fs.list(folderPath)
+    for i=1,#folder do
+        print("Lodaing animation")
+        print(folder[i])
+        sleep(0)
+        shell.run("bg AnimationService.lua",true,rootID+i-1,folderPath.."/"..folder[i])
+    end
+end
+
+if #Args < 3 then
+    print("Too few arguments")
+    print("SO - true,<targetID>,<path>,<loop>")
+    print("AC - false,<rootID>,<path>,<loop>")
+    sleep(1)
+    return false
+end
+if Args[1] then
+    translateSingleObject(Args[2],Args[3])
+    while Args[#Args] do
+        translateSingleObject(Args[2],Args[3])
+    end
+else
+    translateAnimationCollection(Args[2],Args[3])
+    while Args[#Args] do
+        translateSingleObject(Args[2],Args[3])
+    end
 end
